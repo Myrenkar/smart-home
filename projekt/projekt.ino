@@ -11,6 +11,9 @@ String odczyt_serial = "";
 //ints
 int y = 0;
 
+//files
+File GPSFile;
+
 void setup() {
   //set active leds to be used to alarm
   pinMode(4, OUTPUT);
@@ -130,3 +133,8 @@ void odczyt(String komenda) {
   }
 
 }
+
+void getTimeFromGPS(){
+  
+  
+  }
