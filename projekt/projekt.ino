@@ -26,7 +26,7 @@ void setup() {
 
   //enable serial port work
   Serial.begin(9600);
-  Serial.println("Dostepne opcje: \n1. Ustaw godzine rozpoczecia: gstart 'godzina' \n2. Ustaw godzine zakonczenia: gstop 'godzina'\n3. Ustaw minimalny czas wlaczenia obwodu: omin 'czas'\n4. Ustaw maksymalny czas wlaczenia obwodu: omax 'czas'\n5. Wlacz alarm: start\n6. Wylacz alarm: stop\n7. Wyswietl menu: menu ");
+  Serial.println("Dostepne opcje: \n1. Wlacz alarm w punkcie nr(1-4): alarm 'nr'\n2. Wylacz wszystkie alarmy: noalarm\n3. Ustaw godzine rozpoczecia: gstart 'godzina' \n4. Ustaw godzine zakonczenia: gstop 'godzina'\n5. Ustaw dzien dzien tygodnia, od ktorego alarm dziala: daystart: 'nr_dnia'\n6. Ustaw dzien dzien tygodnia, do ktorego alarm dziala: daystop: 'nr_dnia'\n7. Ustaw minimalny czas wlaczenia obwodu: omin 'czas'\n8. Ustaw maksymalny czas wlaczenia obwodu: omax 'czas'\n9. Wyswietl menu: menu ");
 }
 
 void loop() {
@@ -100,21 +100,16 @@ void runSerialPort() {
 void odczyt(String komenda) {
 
   if (komenda.substring(0, 4) == "menu") {
-    Serial.println("Dostepne opcje: \n1. Ustaw godzine rozpoczecia: gstart 'godzina' \n2. Ustaw godzine zakonczenia: gstop 'godzina'\n3. Ustaw minimalny czas wlaczenia obwodu: omin 'czas'\n4. Ustaw maksymalny czas wlaczenia obwodu: omax 'czas'\n5. Wlacz alarm: start\n6. Wylacz alarm: stop\n7. Wyswietl menu: menu ");
+    Serial.println("Dostepne opcje: \n1. Wlacz alarm w punkcie nr(1-4): alarm 'nr'\n2. Wylacz wszystkie alarmy: noalarm\n3. Ustaw godzine rozpoczecia: gstart 'godzina' \n4. Ustaw godzine zakonczenia: gstop 'godzina'\n5. Ustaw dzien dzien tygodnia, od ktorego alarm dziala: daystart: 'nr_dnia'\n6. Ustaw dzien dzien tygodnia, do ktorego alarm dziala: daystop: 'nr_dnia'\n7. Ustaw minimalny czas wlaczenia obwodu: omin 'czas'\n8. Ustaw maksymalny czas wlaczenia obwodu: omax 'czas'\n9. Wyswietl menu: menu ");
 
   }
-  else if (komenda.substring(0, 4) == "echo") {
+  else if (komenda.substring(0, 4) == "alarm") {
 
   }
-  else if (komenda.substring(0, 4) == "line") {
-    if (komenda == "line 1")
-      y = 0;
-    else if (komenda == "line 2")
-      y = 1;
-    else
-      Serial.println("Błędny numer lini.");
+  else if (komenda.substring(0, 6) == "noalarm") {
+
   }
-  else if (komenda.substring(0, 5) == "store") {
+  else if (komenda.substring(0, 5) == "gstart") {
     int n = komenda.length() - 5;
     char array[n];
     komenda.substring(6).toCharArray(array, n);
@@ -122,7 +117,19 @@ void odczyt(String komenda) {
     for (int i = 1; i < n + 1; i++)
       EEPROM.write(i, (int)array[i - 1]);
   }
-  else if (komenda.substring(0, 4) == "read") {
+  else if (komenda.substring(0, 5) == "gstop") {
+
+  }
+  else if (komenda.substring(0, 4) == "omin") {
+
+  }
+  else if (komenda.substring(0, 4) == "omax") {
+
+  }
+  else if (komenda.substring(0, 4) == "line") {
+
+  }
+  else if (komenda.substring(0, 4) == "line") {
 
   }
 
