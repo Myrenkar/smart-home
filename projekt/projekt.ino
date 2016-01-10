@@ -30,11 +30,7 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  //  controllAlarm();
-
   runSerialPort();
-  //  blinkLeds();
 }
 
 //------------------------------------------------------------------------
@@ -107,7 +103,7 @@ void odczyt(String komenda) {
 
   }
   else if (komenda.substring(0, 6) == "noalarm") {
-
+    deactivateAlarm();
   }
   else if (komenda.substring(0, 5) == "gstart") {
     int n = komenda.length() - 5;
@@ -126,29 +122,11 @@ void odczyt(String komenda) {
   else if (komenda.substring(0, 4) == "omax") {
 
   }
-  else if (komenda.substring(0, 4) == "line") {
+  else if (komenda.substring(0, 4) == "daystart") {
 
   }
-  else if (komenda.substring(0, 4) == "line") {
+  else if (komenda.substring(0, 4) == "daystart") {
 
   }
 
 }
-//------------------------------------------------------------------------
-//String getCommand() {
-//  if(Serial.available() > 0) {
-//    String str = Stream.read();
-//    Serial.print("asdasd");
-//    return str;
-//  }
-//}
-
-//------------------------------------------------------------------------
-//void controllAlarm() {
-//  if(getCommand() == String("Turn off")) {
-//    deactivateAlarm();
-//  }
-//  else if(getCommand() == String("Turn on")) {
-//    activateAlarm();
-//  }
-//}
