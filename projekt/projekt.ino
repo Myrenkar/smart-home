@@ -19,6 +19,9 @@ TinyGPSPlus gps;
 SoftwareSerial gpsSerial(4, 3);
 
 void setup() {
+
+    Serial.begin(115200);
+  gpsSerial.begin(9600);
   //set active leds to be used to alarm
   pinMode(7, OUTPUT);
   pinMode(8, OUTPUT);
@@ -31,14 +34,14 @@ void setup() {
   digitalWrite(9, HIGH);
   digitalWrite(10, HIGH);
 
-  gpsSerial.begin(9600);
-  Serial.begin(115200);
+
   Serial.print(F("Testing TinyGPS++ library v. ")); Serial.println(TinyGPSPlus::libraryVersion());
   Serial.println("Dostepne opcje: \n1. Wlacz alarm w punkcie nr(1-4): alarm 'nr'\n2. Wylacz wszystkie alarmy: noalarm\n3. Ustaw godzine rozpoczecia: gstart 'godzina' \n4. Ustaw godzine zakonczenia: gstop 'godzina'\n5. Ustaw dzien dzien tygodnia, od ktorego alarm dziala: daystart: 'nr_dnia'\n6. Ustaw dzien dzien tygodnia, do ktorego alarm dziala: daystop: 'nr_dnia'\n7. Ustaw minimalny czas wlaczenia obwodu: omin 'czas'\n8. Ustaw maksymalny czas wlaczenia obwodu: omax 'czas'\n9. Wyswietl menu: menu ");
 }
 
 void loop() {
   runSerialPort();
+//   getTimeFromGPS(gps.time);
 }
 
 //------------------------------------------------------------------------
@@ -107,10 +110,10 @@ void odczyt(String komenda) {
     Serial.println("Dostepne opcje: \n1. Wlacz alarm w punkcie nr(1-4): alarm 'nr'\n2. Wylacz wszystkie alarmy: noalarm\n3. Ustaw godzine rozpoczecia: gstart 'godzina' \n4. Ustaw godzine zakonczenia: gstop 'godzina'\n5. Ustaw dzien dzien tygodnia, od ktorego alarm dziala: daystart: 'nr_dnia'\n6. Ustaw dzien dzien tygodnia, do ktorego alarm dziala: daystop: 'nr_dnia'\n7. Ustaw minimalny czas wlaczenia obwodu: omin 'czas'\n8. Ustaw maksymalny czas wlaczenia obwodu: omax 'czas'\n9. Wyswietl menu: menu ");
 
   }
-  else if (komenda.substring(0, 4) == "alarm") {
-
+  else if (komenda.substring(0, 5) == "alarm") {
+    getTimeFromGPS(gps.time);
   }
-  else if (komenda.substring(0, 6) == "noalarm") {
+  else if (komenda.substring(0, 7) == "noalarm") {
     deactivateAlarm();
   }
   else if (komenda.substring(0, 5) == "gstart") {
@@ -130,16 +133,55 @@ void odczyt(String komenda) {
   else if (komenda.substring(0, 4) == "omax") {
 
   }
-  else if (komenda.substring(0, 4) == "daystart") {
-
+  else if (komenda.substring(0, 8) == "daystart") {
+    int n = komenda.length() - 8;
+    char array[n];
+    komenda.substring(6).toCharArray(array, n);
+    EEPROM.write(0, n);
+    for (int i = 1; i < n + 1; i++)
+      EEPROM.write(i, (int)array[i - 1]);
   }
-  else if (komenda.substring(0, 4) == "daystart") {
+  else if (komenda.substring(0, 8) == "daystart") {
 
   }
 
 }
 
-void getTimeFromGPS() {
-
-
+static void getDateFromGPS(TinyGPSDate &d) {
+  if (!d.isValid())
+  {
+    Serial.print("Invalid date\n");
+  }
+  else
+  {
+    char sz[32];
+    sprintf(sz, "%02d/%02d/%02d ", d.month(), d.day(), d.year());
+    Serial.println(sz);
+  }
+smartDelay(1000);
 }
+
+static void getTimeFromGPS(TinyGPSTime &t) {
+  if (!t.isValid())
+  {
+    Serial.print("Invalid time\n");
+  }
+  else
+  {
+    char sz[32];
+    sprintf(sz, "%02d:%02d:%02d ", t.hour(), t.minute(), t.second());
+    Serial.println(sz);
+  }
+  smartDelay(1000);
+}
+
+static void smartDelay(unsigned long ms)
+{
+  unsigned long start = millis();
+  do 
+  {
+    while (gpsSerial.available())
+      gps.encode(gpsSerial.read());
+  } while (millis() - start < ms);
+}
+
