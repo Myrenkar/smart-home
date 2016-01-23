@@ -1,5 +1,7 @@
 #include <LiquidCrystal.h>
 #include <EEPROM.h>
+#include <SoftwareSerial.h>
+#include <TinyGPS++.h>
 
 //boleans
 bool isAlarmActivated = true;
@@ -12,23 +14,26 @@ String odczyt_serial = "";
 int y = 0;
 
 //files
-File GPSFile;
+TinyGPSPlus gps;
+
+SoftwareSerial gpsSerial(4, 3);
 
 void setup() {
   //set active leds to be used to alarm
-  pinMode(4, OUTPUT);
-  pinMode(5, OUTPUT);
-  pinMode(6, OUTPUT);
   pinMode(7, OUTPUT);
+  pinMode(8, OUTPUT);
+  pinMode(9, OUTPUT);
+  pinMode(10, OUTPUT);
 
   // put off the leds
-  digitalWrite(4, HIGH);
-  digitalWrite(5, HIGH);
-  digitalWrite(6, HIGH);
   digitalWrite(7, HIGH);
+  digitalWrite(8, HIGH);
+  digitalWrite(9, HIGH);
+  digitalWrite(10, HIGH);
 
-  //enable serial port work
-  Serial.begin(9600);
+  gpsSerial.begin(9600);
+  Serial.begin(115200);
+  Serial.print(F("Testing TinyGPS++ library v. ")); Serial.println(TinyGPSPlus::libraryVersion());
   Serial.println("Dostepne opcje: \n1. Wlacz alarm w punkcie nr(1-4): alarm 'nr'\n2. Wylacz wszystkie alarmy: noalarm\n3. Ustaw godzine rozpoczecia: gstart 'godzina' \n4. Ustaw godzine zakonczenia: gstop 'godzina'\n5. Ustaw dzien dzien tygodnia, od ktorego alarm dziala: daystart: 'nr_dnia'\n6. Ustaw dzien dzien tygodnia, do ktorego alarm dziala: daystop: 'nr_dnia'\n7. Ustaw minimalny czas wlaczenia obwodu: omin 'czas'\n8. Ustaw maksymalny czas wlaczenia obwodu: omax 'czas'\n9. Wyswietl menu: menu ");
 }
 
@@ -134,7 +139,7 @@ void odczyt(String komenda) {
 
 }
 
-void getTimeFromGPS(){
-  
-  
-  }
+void getTimeFromGPS() {
+
+
+}
