@@ -25,6 +25,8 @@ struct Configuration
   int gStop ;
   int dStart;
   int dStop ;
+  int oMin;
+  int oMax;
 } ;
 
 
@@ -134,13 +136,19 @@ void odczyt(String komenda) {
     EEPROM_writeAnything(0, parameters);
   }
   else if (komenda.substring(0, 5) == "gstop") {
-
+    int n = komenda.length() - 6;
+    parameters.gStop = n;
+    EEPROM_writeAnything(0, parameters);
   }
   else if (komenda.substring(0, 4) == "omin") {
-
+    int n = komenda.length() - 5;
+    parameters.oMin = n;
+    EEPROM_writeAnything(0, parameters);
   }
   else if (komenda.substring(0, 4) == "omax") {
-
+  int n = komenda.length() - 5;
+    parameters.oMax = n;
+    EEPROM_writeAnything(0, parameters);
   }
   else if (komenda.substring(0, 8) == "daystart") {
     int n = komenda.length() - 8;
