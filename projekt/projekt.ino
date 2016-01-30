@@ -31,7 +31,9 @@ struct Configuration
 
 
 void setup() {
-
+  Configuration parameters = {8, 20, 1, 31, 0, 0};
+  EEPROM_writeAnything(0, parameters);
+  
   Serial.begin(115200);
   gpsSerial.begin(9600);
   //set active leds to be used to alarm
@@ -117,8 +119,8 @@ void runSerialPort() {
 
 //-----------------------------------------------------------------------
 void odczyt(String komenda) {
-  Configuration parameters = {8, 20, 1, 31};
-
+Configuration parameters;
+  
   if (komenda.substring(0, 4) == "menu") {
     Serial.println("Dostepne opcje: \n1. Wlacz alarm w punkcie nr(1-4): alarm 'nr'\n2. Wylacz wszystkie alarmy: noalarm\n3. Ustaw godzine rozpoczecia: gstart 'godzina' \n4. Ustaw godzine zakonczenia: gstop 'godzina'\n5. Ustaw dzien dzien tygodnia, od ktorego alarm dziala: daystart: 'nr_dnia'\n6. Ustaw dzien dzien tygodnia, do ktorego alarm dziala: daystop: 'nr_dnia'\n7. Ustaw minimalny czas wlaczenia obwodu: omin 'czas'\n8. Ustaw maksymalny czas wlaczenia obwodu: omax 'czas'\n9. Wyswietl menu: menu ");
 
@@ -130,7 +132,7 @@ void odczyt(String komenda) {
     deactivateAlarm();
   }
   else if (komenda.substring(0, 6) == "gstart") {
-    int n = komenda.length() - 6;
+    int n = komenda.length() - 7;
 
     parameters.gStart = n;
     EEPROM_writeAnything(0, parameters);
@@ -158,8 +160,13 @@ void odczyt(String komenda) {
     for (int i = 1; i < n + 1; i++)
       EEPROM.write(i, (int)array[i - 1]);
   }
-  else if (komenda.substring(0, 8) == "daystart") {
-
+  else if (komenda.substring(0, 7) == "daystop") {
+   EEPROM_readAnything(0, parameters);
+   Serial.println("kupa");
+   Serial.println(parameters.gStart);
+   Serial.println(parameters.gStop);
+   Serial.println(parameters.dStart);
+    Serial.println(parameters.dStop);
   }
 
 }
