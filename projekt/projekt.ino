@@ -2,6 +2,7 @@
 #include <EEPROM.h>
 #include <SoftwareSerial.h>
 #include <TinyGPS++.h>
+#include "EEPROMAnything.h"
 
 //boleans
 bool isAlarmActivated = true;
@@ -15,12 +16,21 @@ int y = 0;
 
 //files
 TinyGPSPlus gps;
-
 SoftwareSerial gpsSerial(4, 3);
+
+
+struct Configuration
+{
+  int gStart ;
+  int gStop ;
+  int dStart;
+  int dStop ;
+} ;
+
 
 void setup() {
 
-    Serial.begin(115200);
+  Serial.begin(115200);
   gpsSerial.begin(9600);
   //set active leds to be used to alarm
   pinMode(7, OUTPUT);
@@ -34,14 +44,14 @@ void setup() {
   digitalWrite(9, HIGH);
   digitalWrite(10, HIGH);
 
-
-  Serial.print(F("Testing TinyGPS++ library v. ")); Serial.println(TinyGPSPlus::libraryVersion());
+  //    EEPROM_readAnything(0, Configuration);
+  Serial.print(F("Testing TinyGPS++ library v. \n\n")); Serial.println(TinyGPSPlus::libraryVersion());
   Serial.println("Dostepne opcje: \n1. Wlacz alarm w punkcie nr(1-4): alarm 'nr'\n2. Wylacz wszystkie alarmy: noalarm\n3. Ustaw godzine rozpoczecia: gstart 'godzina' \n4. Ustaw godzine zakonczenia: gstop 'godzina'\n5. Ustaw dzien dzien tygodnia, od ktorego alarm dziala: daystart: 'nr_dnia'\n6. Ustaw dzien dzien tygodnia, do ktorego alarm dziala: daystop: 'nr_dnia'\n7. Ustaw minimalny czas wlaczenia obwodu: omin 'czas'\n8. Ustaw maksymalny czas wlaczenia obwodu: omax 'czas'\n9. Wyswietl menu: menu ");
 }
 
 void loop() {
   runSerialPort();
-//   getTimeFromGPS(gps.time);
+
 }
 
 //------------------------------------------------------------------------
@@ -105,24 +115,23 @@ void runSerialPort() {
 
 //-----------------------------------------------------------------------
 void odczyt(String komenda) {
+  Configuration parameters = {8, 20, 1, 31};
 
   if (komenda.substring(0, 4) == "menu") {
     Serial.println("Dostepne opcje: \n1. Wlacz alarm w punkcie nr(1-4): alarm 'nr'\n2. Wylacz wszystkie alarmy: noalarm\n3. Ustaw godzine rozpoczecia: gstart 'godzina' \n4. Ustaw godzine zakonczenia: gstop 'godzina'\n5. Ustaw dzien dzien tygodnia, od ktorego alarm dziala: daystart: 'nr_dnia'\n6. Ustaw dzien dzien tygodnia, do ktorego alarm dziala: daystop: 'nr_dnia'\n7. Ustaw minimalny czas wlaczenia obwodu: omin 'czas'\n8. Ustaw maksymalny czas wlaczenia obwodu: omax 'czas'\n9. Wyswietl menu: menu ");
 
   }
   else if (komenda.substring(0, 5) == "alarm") {
-    getTimeFromGPS(gps.time);
+    //    getTimeFromGPS(gps.time);
   }
   else if (komenda.substring(0, 7) == "noalarm") {
     deactivateAlarm();
   }
-  else if (komenda.substring(0, 5) == "gstart") {
-    int n = komenda.length() - 5;
-    char array[n];
-    komenda.substring(6).toCharArray(array, n);
-    EEPROM.write(0, n);
-    for (int i = 1; i < n + 1; i++)
-      EEPROM.write(i, (int)array[i - 1]);
+  else if (komenda.substring(0, 6) == "gstart") {
+    int n = komenda.length() - 6;
+
+    parameters.gStart = n;
+    EEPROM_writeAnything(0, parameters);
   }
   else if (komenda.substring(0, 5) == "gstop") {
 
@@ -158,7 +167,7 @@ static void getDateFromGPS(TinyGPSDate &d) {
     sprintf(sz, "%02d/%02d/%02d ", d.month(), d.day(), d.year());
     Serial.println(sz);
   }
-smartDelay(1000);
+  smartDelay(100);
 }
 
 static void getTimeFromGPS(TinyGPSTime &t) {
@@ -172,13 +181,13 @@ static void getTimeFromGPS(TinyGPSTime &t) {
     sprintf(sz, "%02d:%02d:%02d ", t.hour(), t.minute(), t.second());
     Serial.println(sz);
   }
-  smartDelay(1000);
+  smartDelay(100);
 }
 
 static void smartDelay(unsigned long ms)
 {
   unsigned long start = millis();
-  do 
+  do
   {
     while (gpsSerial.available())
       gps.encode(gpsSerial.read());
