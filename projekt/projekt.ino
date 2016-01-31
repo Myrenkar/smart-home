@@ -28,12 +28,12 @@ struct Configuration
   int oMin;
   int oMax;
 } ;
-
+Configuration parameters = {0, 0, 0, 0, 0, 0};
 
 void setup() {
-  Configuration parameters = {8, 20, 1, 31, 0, 0};
+  parameters = {8, 20, 1, 31, 0, 0};
   EEPROM_writeAnything(0, parameters);
-  
+
   Serial.begin(115200);
   gpsSerial.begin(9600);
   //set active leds to be used to alarm
@@ -119,58 +119,82 @@ void runSerialPort() {
 
 //-----------------------------------------------------------------------
 void odczyt(String komenda) {
-Configuration parameters;
-  
+  Configuration parameters;
+
   if (komenda.substring(0, 4) == "menu") {
     Serial.println("Dostepne opcje: \n1. Wlacz alarm w punkcie nr(1-4): alarm 'nr'\n2. Wylacz wszystkie alarmy: noalarm\n3. Ustaw godzine rozpoczecia: gstart 'godzina' \n4. Ustaw godzine zakonczenia: gstop 'godzina'\n5. Ustaw dzien dzien tygodnia, od ktorego alarm dziala: daystart: 'nr_dnia'\n6. Ustaw dzien dzien tygodnia, do ktorego alarm dziala: daystop: 'nr_dnia'\n7. Ustaw minimalny czas wlaczenia obwodu: omin 'czas'\n8. Ustaw maksymalny czas wlaczenia obwodu: omax 'czas'\n9. Wyswietl menu: menu ");
 
   }
   else if (komenda.substring(0, 5) == "alarm") {
+
+    EEPROM_readAnything(0, parameters);
+    Serial.println("Gstart");
+    Serial.println(parameters.gStart);
+    Serial.println("Gstop");
+    Serial.println(parameters.gStop);
+    Serial.println("Dstart");
+    Serial.println(parameters.dStart);
+    Serial.println("Dstop");
+    Serial.println(parameters.dStop);
+    Serial.println("Omin");
+    Serial.println(parameters.oMin);
+    Serial.println("Omax");
+    Serial.println(parameters.oMax);
+
     //    getTimeFromGPS(gps.time);
   }
   else if (komenda.substring(0, 7) == "noalarm") {
     deactivateAlarm();
   }
   else if (komenda.substring(0, 6) == "gstart") {
-    int n = komenda.length() - 7;
-
+    komenda = komenda.substring(7);
+    int n = komenda.toInt();
+    Serial.println(n);
     parameters.gStart = n;
-    EEPROM_writeAnything(0, parameters);
+    EEPROM_writeAnything(0, parameters.gStart);
   }
   else if (komenda.substring(0, 5) == "gstop") {
-    int n = komenda.length() - 6;
+    komenda = komenda.substring(6);
+    int n = komenda.toInt();
+    Serial.println(n);
+
     parameters.gStop = n;
-    EEPROM_writeAnything(0, parameters);
+    EEPROM_writeAnything(0, parameters.gStop);
   }
   else if (komenda.substring(0, 4) == "omin") {
-    int n = komenda.length() - 5;
+    komenda = komenda.substring(5);
+    int n = komenda.toInt();
+    Serial.println(n);
+
     parameters.oMin = n;
-    EEPROM_writeAnything(0, parameters);
+    EEPROM_writeAnything(0, parameters.oMin);
   }
   else if (komenda.substring(0, 4) == "omax") {
-  int n = komenda.length() - 5;
+    komenda = komenda.substring(5);
+    int n = komenda.toInt();
+    Serial.println(n);
+
     parameters.oMax = n;
-    EEPROM_writeAnything(0, parameters);
+    EEPROM_writeAnything(0, parameters.oMax);
   }
   else if (komenda.substring(0, 8) == "daystart") {
-    int n = komenda.length() - 8;
-    char array[n];
-    komenda.substring(6).toCharArray(array, n);
-    EEPROM.write(0, n);
-    for (int i = 1; i < n + 1; i++)
-      EEPROM.write(i, (int)array[i - 1]);
+    komenda = komenda.substring(9);
+    int n = komenda.toInt();
+    Serial.println(n);
+
+    parameters.dStart = n;
+    EEPROM_writeAnything(0, parameters.dStart);
   }
   else if (komenda.substring(0, 7) == "daystop") {
-   EEPROM_readAnything(0, parameters);
-   Serial.println("kupa");
-   Serial.println(parameters.gStart);
-   Serial.println(parameters.gStop);
-   Serial.println(parameters.dStart);
-    Serial.println(parameters.dStop);
+    komenda = komenda.substring(8);
+    int n = komenda.toInt();
+    Serial.println(n);
+
+    parameters.dStop = n;
+    EEPROM_writeAnything(0, parameters.dStop);
+
   }
-
 }
-
 static void getDateFromGPS(TinyGPSDate &d) {
   if (!d.isValid())
   {
