@@ -79,8 +79,9 @@ void blinkLeds() {
 }
 
 //------------------------------------------------------------------------
-void activateAlarm() {
+void activateAlarm(int stationNumber) {
   isAlarmActivated = true;
+  
 }
 
 //------------------------------------------------------------------------
@@ -130,7 +131,7 @@ void odczyt(String komenda) {
 
    
 
-    //    getTimeFromGPS(gps.time);
+       getTimeFromGPS(gps.time);
   }
   else if (komenda.substring(0, 7) == "noalarm") {
     deactivateAlarm();
