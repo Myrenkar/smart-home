@@ -1,11 +1,11 @@
 #include <LiquidCrystal.h>
 #include <EEPROM.h>
 #include <SoftwareSerial.h>
-#include <C:\Users\Tomek\Documents\GitHub\smart-home\projekt\TinyGPS++.h>
+#include <TinyGPS++.h>
 #include "EEPROMAnything.h"
 
 //boleans
-bool isAlarmActivated = true;
+bool isAlarmActivated = false;
 boolean koniec_odczytu = false;
 
 //Strings
@@ -30,7 +30,6 @@ struct Configuration
 
 Configuration parameters;
 
-uint8_t dateDay;
 
 void setup() {
   parameters = {8, 20, 1, 31, 0, 0};
@@ -40,63 +39,67 @@ void setup() {
   gpsSerial.begin(9600);
 
 
-  pinMode(7, OUTPUT);
   pinMode(8, OUTPUT);
   pinMode(9, OUTPUT);
   pinMode(10, OUTPUT);
+  pinMode(11, OUTPUT);
 
   // put off the leds
-  digitalWrite(7, HIGH);
   digitalWrite(8, HIGH);
   digitalWrite(9, HIGH);
   digitalWrite(10, HIGH);
- 
+  digitalWrite(11, HIGH);
+
 
   Serial.print(F("Testing TinyGPS++ library v. \n\n")); Serial.println(TinyGPSPlus::libraryVersion());
   Serial.println("Dostepne opcje: \n1. Wlacz alarm w punkcie nr(1-4): alarm 'nr'\n2. Wylacz wszystkie alarmy: noalarm\n3. Ustaw godzine rozpoczecia: gstart 'godzina' \n4. Ustaw godzine zakonczenia: gstop 'godzina'\n5. Ustaw dzien dzien tygodnia, od ktorego alarm dziala: daystart: 'nr_dnia'\n6. Ustaw dzien dzien tygodnia, do ktorego alarm dziala: daystop: 'nr_dnia'\n7. Ustaw minimalny czas wlaczenia obwodu: omin 'czas'\n8. Ustaw maksymalny czas wlaczenia obwodu: omax 'czas'\n9. Wyswietl menu: menu ");
 }
 
 void loop() {
-  
-    getDateFromGPS(gps.date);
-  dateDay = gps.date.month();
+
+  activateAlarm();
   runSerialPort();
 
 }
 
 //------------------------------------------------------------------------
 void blinkLeds() {
-  if (isAlarmActivated) {
-    digitalWrite(4, LOW);
-    digitalWrite(5, LOW);
-    digitalWrite(6, LOW);
-    digitalWrite(7, LOW);
 
-    delay(700);
+  digitalWrite(8, LOW);
+  digitalWrite(9, LOW);
+  digitalWrite(10, LOW);
+  digitalWrite(11, LOW);
 
-    digitalWrite(4, HIGH);
-    digitalWrite(5, HIGH);
-    digitalWrite(6, HIGH);
-    digitalWrite(7, HIGH);
+  delay(700);
 
-    delay(700);
-  }
+  digitalWrite(8, HIGH);
+  digitalWrite(9, HIGH);
+  digitalWrite(10, HIGH);
+  digitalWrite(11, HIGH);
+
+  delay(700);
+
 }
 
 //------------------------------------------------------------------------
-void activateAlarm(int stationNumber) {
-  isAlarmActivated = true;
+void activateAlarm() {
+
+  if (isAlarmActivated && !isValidDateTime()){
+    blinkLeds();
+}
 
 }
 
 //------------------------------------------------------------------------
 void deactivateAlarm() {
-  isAlarmActivated = false;
+  if (isAlarmActivated == false) {
 
-  digitalWrite(4, HIGH);
-  digitalWrite(5, HIGH);
-  digitalWrite(6, HIGH);
-  digitalWrite(7, HIGH);
+    digitalWrite(8, HIGH);
+    digitalWrite(9, HIGH);
+    digitalWrite(10, HIGH);
+    digitalWrite(11, HIGH);
+
+  }
 }
 //------------------------------------------------------------------------
 void runSerialPort() {
@@ -135,13 +138,12 @@ void odczyt(String komenda) {
   else if (komenda.substring(0, 5) == "alarm") {
     komenda = komenda.substring(7);
     int n = komenda.toInt();
-    dateDay = gps.date.month();
-    //get
-    Serial.println(dateDay);
+    isAlarmActivated = true;
+    activateAlarm();
   }
   else if (komenda.substring(0, 7) == "noalarm") {
-
-    //    deactivateAlarm();
+    isAlarmActivated = false;
+    deactivateAlarm();
   }
   else if (komenda.substring(0, 6) == "gstart") {
     komenda = komenda.substring(7);
@@ -204,7 +206,6 @@ static int getDateFromGPS(TinyGPSDate &d) {
   int day;
   if (!d.isValid())
   {
-    Serial.print("Invalid date\n");
     day = 0;
   }
   else
@@ -246,12 +247,12 @@ bool isValidDateTime() {
   Configuration dataParams;
   EEPROM_readAnything(0, dataParams);
 
-  if(getDateFromGPS(gps.date) < dataParams.dStart && getDateFromGPS(gps.date) > dataParams.dStop && getHourFromGPS(gps.time) < dataParams.gStart && getHourFromGPS(gps.time) > dataParams.gStop) {
+  if (getDateFromGPS(gps.date) < dataParams.dStart && getDateFromGPS(gps.date) > dataParams.dStop && getHourFromGPS(gps.time) < dataParams.gStart && getHourFromGPS(gps.time) > dataParams.gStop) {
     validation = true;
   }
   else {
     validation = false;
-  }  
+  }
   return validation;
 }
 
