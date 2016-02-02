@@ -1,7 +1,7 @@
 #include <LiquidCrystal.h>
 #include <EEPROM.h>
 #include <SoftwareSerial.h>
-#include <TinyGPS++.h>
+#include <C:\Users\Tomek\Documents\GitHub\smart-home\projekt\TinyGPS++.h>
 #include "EEPROMAnything.h"
 
 //boleans
@@ -58,7 +58,8 @@ void setup() {
 
 void loop() {
   
-dateDay = gps.date.month();
+    getDateFromGPS(gps.date);
+  dateDay = gps.date.month();
   runSerialPort();
 
 }
@@ -99,10 +100,10 @@ void deactivateAlarm() {
 }
 //------------------------------------------------------------------------
 void runSerialPort() {
-  // sprawdzamy czy są nowe dane
+  // sprawdzamy czy sÄ… nowe dane
   if (Serial.available() > 0)
   {
-    //wykonujemy pętle do momentu w którym są dane
+    //wykonujemy pÄ™tle do momentu w ktĂłrym sÄ… dane
     while (Serial.available())
     {
       char znak = (char)Serial.read();
@@ -134,7 +135,7 @@ void odczyt(String komenda) {
   else if (komenda.substring(0, 5) == "alarm") {
     komenda = komenda.substring(7);
     int n = komenda.toInt();
-dateDay = gps.date.month();
+    dateDay = gps.date.month();
     //get
     Serial.println(dateDay);
     getTimeFromGPS(gps.time);
@@ -200,32 +201,34 @@ dateDay = gps.date.month();
     Serial.println(parameters.oMax);
   }
 }
-static void getDateFromGPS(TinyGPSDate &d) {
+static int getDateFromGPS(TinyGPSDate &d) {
+  int day;
   if (!d.isValid())
   {
     Serial.print("Invalid date\n");
+    day = 0;
   }
   else
   {
-    char sz[32];
-    sprintf(sz, "%02d/%02d/%02d ", d.month(), d.day(), d.year());
-    Serial.println(sz);
+    day = d.day();
   }
   smartDelay(100);
+  return day;
 }
 
-static void getTimeFromGPS(TinyGPSTime &t) {
+static int getHourFromGPS(TinyGPSTime &t) {
+  int hour;
   if (!t.isValid())
   {
     Serial.print("Invalid time\n");
+    hour = -1;
   }
   else
   {
-    char sz[32];
-    sprintf(sz, "%02d:%02d:%02d ", t.hour(), t.minute(), t.second());
-    Serial.println(sz);
+    hour = t.hour();
   }
   smartDelay(100);
+  return hour;
 }
 
 static void smartDelay(unsigned long ms)
@@ -236,5 +239,22 @@ static void smartDelay(unsigned long ms)
     while (gpsSerial.available())
       gps.encode(gpsSerial.read());
   } while (millis() - start < ms);
+}
+
+bool isValidDateTime() {
+  bool validation;
+
+  Configuration dateParams;
+  EEPROM_readAnything(0, dateParams);
+
+  if(getDateFromGPS(gps.date) < dataParams.dStart && getDateFromGPS(gps.date) > dataParams.dStop && HourFromGPS(gps.time) < dataParams.gStart && getHourFromGPS(gps.time) > dataParams.gStop) {
+    validation = true;
+  }
+  else {
+    validation = false;
+  }  
+  return validation;
+}
+
 }
 
