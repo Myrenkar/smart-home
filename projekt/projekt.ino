@@ -138,7 +138,6 @@ void odczyt(String komenda) {
     dateDay = gps.date.month();
     //get
     Serial.println(dateDay);
-    getTimeFromGPS(gps.time);
   }
   else if (komenda.substring(0, 7) == "noalarm") {
 
@@ -244,17 +243,15 @@ static void smartDelay(unsigned long ms)
 bool isValidDateTime() {
   bool validation;
 
-  Configuration dateParams;
-  EEPROM_readAnything(0, dateParams);
+  Configuration dataParams;
+  EEPROM_readAnything(0, dataParams);
 
-  if(getDateFromGPS(gps.date) < dataParams.dStart && getDateFromGPS(gps.date) > dataParams.dStop && HourFromGPS(gps.time) < dataParams.gStart && getHourFromGPS(gps.time) > dataParams.gStop) {
+  if(getDateFromGPS(gps.date) < dataParams.dStart && getDateFromGPS(gps.date) > dataParams.dStop && getHourFromGPS(gps.time) < dataParams.gStart && getHourFromGPS(gps.time) > dataParams.gStop) {
     validation = true;
   }
   else {
     validation = false;
   }  
   return validation;
-}
-
 }
 
