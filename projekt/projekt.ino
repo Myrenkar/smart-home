@@ -4,6 +4,10 @@
 #include <TinyGPS++.h>
 #include "EEPROMAnything.h"
 
+#define Diod1 5
+#define Diod2 6
+#define Diod3 7
+#define Diod4 8
 //boleans
 bool isAlarmActivated = false;
 boolean koniec_odczytu = false;
@@ -14,6 +18,11 @@ String odczyt_serial = "";
 //ints
 int y = 0;
 
+int sensorVal1;
+int sensorVal2 ;
+int sensorVal3 ;
+int sensorVal4 ;
+int diodNumber;
 //files
 TinyGPSPlus gps;
 SoftwareSerial gpsSerial(4, 3);
@@ -39,16 +48,21 @@ void setup() {
   gpsSerial.begin(9600);
 
 
-  pinMode(8, OUTPUT);
-  pinMode(9, OUTPUT);
-  pinMode(10, OUTPUT);
-  pinMode(11, OUTPUT);
+  pinMode(Diod1, OUTPUT);
+  pinMode(Diod2, OUTPUT);
+  pinMode(Diod3, OUTPUT);
+  pinMode(Diod4, OUTPUT);
+
+  pinMode(9, INPUT_PULLUP);
+  pinMode(10, INPUT_PULLUP);
+  pinMode(11, INPUT_PULLUP);
+  pinMode(12, INPUT_PULLUP);
 
   // put off the leds
-  digitalWrite(8, HIGH);
-  digitalWrite(9, HIGH);
-  digitalWrite(10, HIGH);
-  digitalWrite(11, HIGH);
+  digitalWrite(Diod1, HIGH);
+  digitalWrite(Diod2, HIGH);
+  digitalWrite(Diod3, HIGH);
+  digitalWrite(Diod4, HIGH);
 
 
   Serial.print(F("Testing TinyGPS++ library v. \n\n")); Serial.println(TinyGPSPlus::libraryVersion());
@@ -57,36 +71,65 @@ void setup() {
 
 void loop() {
 
-  activateAlarm();
+  sensorVal1 = digitalRead(9);
+  sensorVal2 = digitalRead(10);
+  sensorVal3 = digitalRead(11);
+  sensorVal4 = digitalRead(12);
+
+ activateAlarm();
   runSerialPort();
 
 }
 
 //------------------------------------------------------------------------
 void blinkLeds() {
+  int diod = 0;
+  if (diodNumber == 1)
+  {
+    diod = Diod1;
+  }
+  else  if (diodNumber == 2)
+  {
+    diod = Diod2;
+  }
+  else if (diodNumber == 3)
+  {
+    diod = Diod3;
+  }
+  if (diodNumber == 4)
+  {
+    diod = Diod4;
+  }
+  if (isAlarmActivated) {
+    digitalWrite(diod, LOW);
+  }
 
-  digitalWrite(8, LOW);
-  digitalWrite(9, LOW);
-  digitalWrite(10, LOW);
-  digitalWrite(11, LOW);
-
-  delay(700);
-
-  digitalWrite(8, HIGH);
-  digitalWrite(9, HIGH);
-  digitalWrite(10, HIGH);
-  digitalWrite(11, HIGH);
-
-  delay(700);
 
 }
 
 //------------------------------------------------------------------------
 void activateAlarm() {
-
-  if (isAlarmActivated && !isValidDateTime()){
+  int sensor;
+  if (diodNumber == 1)
+  {
+    sensor = sensorVal1;
+  }
+  else if (diodNumber == 2)
+  {
+    sensor = sensorVal2;
+  }
+  else if (diodNumber == 3)
+  {
+    sensor = sensorVal3;
+  }
+  else if (diodNumber == 4)
+  {
+    sensor = sensorVal4;
+  }
+  
+  if (isAlarmActivated && !isValidDateTime() && sensor == LOW) {
     blinkLeds();
-}
+  }
 
 }
 
@@ -94,10 +137,10 @@ void activateAlarm() {
 void deactivateAlarm() {
   if (isAlarmActivated == false) {
 
+    digitalWrite(5, HIGH);
+    digitalWrite(6, HIGH);
+    digitalWrite(7, HIGH);
     digitalWrite(8, HIGH);
-    digitalWrite(9, HIGH);
-    digitalWrite(10, HIGH);
-    digitalWrite(11, HIGH);
 
   }
 }
@@ -136,10 +179,12 @@ void odczyt(String komenda) {
 
   }
   else if (komenda.substring(0, 5) == "alarm") {
-    komenda = komenda.substring(7);
+    
+    komenda = komenda.substring(6);
     int n = komenda.toInt();
     isAlarmActivated = true;
-    activateAlarm();
+    Serial.println(n);
+    diodNumber  = n;
   }
   else if (komenda.substring(0, 7) == "noalarm") {
     isAlarmActivated = false;
